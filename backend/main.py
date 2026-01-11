@@ -174,41 +174,48 @@ def check_v2_models_available() -> dict:
         "body_pose": False,
         "base_model": False,
         "inpainting": False,
-        "models_found": []
+        "models_found": [],
+        "models_dir": str(v2_models_dir)
     }
 
     if not v2_models_dir.exists():
         return status
 
-    # Check for InsightFace models
+    # Check for InsightFace models (antelopev2 folder with .onnx files)
     insightface_dir = v2_models_dir / "insightface"
     if insightface_dir.exists():
-        if any(insightface_dir.glob("**/*.onnx")):
+        # Check for .onnx files recursively (they're in antelopev2 subfolder)
+        onnx_files = list(insightface_dir.glob("**/*.onnx"))
+        if onnx_files:
             status["face_detection"] = True
             status["models_found"].append("insightface")
 
     # Check for DWPose models
     dwpose_dir = v2_models_dir / "dwpose"
     if dwpose_dir.exists():
-        if any(dwpose_dir.glob("*.onnx")):
+        onnx_files = list(dwpose_dir.glob("*.onnx"))
+        if onnx_files:
             status["body_pose"] = True
             status["models_found"].append("dwpose")
 
-    # Check for base models
-    base_models_dir = v2_models_dir / "base_models"
+    # Check for base models in checkpoints directory (where model_downloader puts them)
     checkpoints_dir = v2_models_dir / "checkpoints"
-    for models_dir in [base_models_dir, checkpoints_dir]:
-        if models_dir and models_dir.exists():
-            if any(models_dir.glob("*.safetensors")) or any(models_dir.glob("*.ckpt")):
-                status["base_model"] = True
-                status["models_found"].append("base_model")
-                break
+    base_models_dir = v2_models_dir / "base_models"
 
-    # Check for inpainting model
-    if base_models_dir and base_models_dir.exists():
-        if any(base_models_dir.glob("*inpaint*")) or any(base_models_dir.glob("*inpainting*")):
-            status["inpainting"] = True
-            status["models_found"].append("inpainting")
+    for models_dir in [checkpoints_dir, base_models_dir]:
+        if models_dir and models_dir.exists():
+            safetensor_files = list(models_dir.glob("*.safetensors"))
+            ckpt_files = list(models_dir.glob("*.ckpt"))
+            if safetensor_files or ckpt_files:
+                status["base_model"] = True
+                status["models_found"].append(f"base_model ({len(safetensor_files) + len(ckpt_files)} files)")
+
+                # Check specifically for inpainting model
+                inpaint_files = list(models_dir.glob("*inpaint*"))
+                if inpaint_files:
+                    status["inpainting"] = True
+                    status["models_found"].append("inpainting")
+                break
 
     # V2 is available if we have at least face detection or base model
     status["available"] = status["face_detection"] or status["base_model"]
