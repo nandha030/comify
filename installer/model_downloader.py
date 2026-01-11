@@ -14,15 +14,15 @@ from dataclasses import dataclass
 from concurrent.futures import ThreadPoolExecutor
 import threading
 
-# Model definitions with HuggingFace URLs
+# Model definitions with working HuggingFace URLs
 MODELS = {
     "face_detection": {
-        "name": "InsightFace Buffalo_L",
+        "name": "InsightFace Antelopev2",
         "files": [
             {
-                "url": "https://huggingface.co/datasets/Gourieff/ReActor/resolve/main/models/insightface/models/buffalo_l.zip",
-                "path": "models/insightface/buffalo_l.zip",
-                "size_mb": 500,
+                "url": "https://huggingface.co/MonsterMMORPG/tools/resolve/main/antelopev2.zip",
+                "path": "insightface/models/antelopev2.zip",
+                "size_mb": 360,
                 "extract": True
             }
         ],
@@ -34,109 +34,76 @@ MODELS = {
         "files": [
             {
                 "url": "https://huggingface.co/yzd-v/DWPose/resolve/main/dw-ll_ucoco_384.onnx",
-                "path": "models/dwpose/dw-ll_ucoco_384.onnx",
+                "path": "dwpose/dw-ll_ucoco_384.onnx",
+                "size_mb": 200
+            },
+            {
+                "url": "https://huggingface.co/yzd-v/DWPose/resolve/main/yolox_l.onnx",
+                "path": "dwpose/yolox_l.onnx",
                 "size_mb": 200
             }
         ],
         "required": True,
         "profiles": ["high", "medium", "low", "cpu_optimized"]
     },
-    "segmentation": {
-        "name": "Segment Anything (SAM)",
-        "files": [
-            {
-                "url": "https://huggingface.co/spaces/abhishek/StableSAM/resolve/main/sam_vit_h_4b8939.pth",
-                "path": "models/sam/sam_vit_h.pth",
-                "size_mb": 2500,
-                "profiles": ["high"]
-            },
-            {
-                "url": "https://huggingface.co/spaces/abhishek/StableSAM/resolve/main/sam_vit_b_01ec64.pth",
-                "path": "models/sam/sam_vit_b.pth",
-                "size_mb": 375,
-                "profiles": ["medium", "low", "cpu_optimized"]
-            }
-        ],
-        "required": True,
-        "profiles": ["high", "medium", "low", "cpu_optimized"]
-    },
-    "tryon_idmvton": {
-        "name": "IDM-VTON",
-        "files": [
-            {
-                "url": "https://huggingface.co/yisol/IDM-VTON/resolve/main/unet/diffusion_pytorch_model.safetensors",
-                "path": "models/idm-vton/unet/diffusion_pytorch_model.safetensors",
-                "size_mb": 1700
-            },
-            {
-                "url": "https://huggingface.co/yisol/IDM-VTON/resolve/main/image_encoder/model.safetensors",
-                "path": "models/idm-vton/image_encoder/model.safetensors",
-                "size_mb": 1200
-            }
-        ],
-        "required": True,
-        "profiles": ["high", "medium"]
-    },
-    "tryon_ootd": {
-        "name": "OOTDiffusion",
-        "files": [
-            {
-                "url": "https://huggingface.co/levihsu/OOTDiffusion/resolve/main/ootd_hd.safetensors",
-                "path": "models/ootdiffusion/ootd_hd.safetensors",
-                "size_mb": 2000
-            }
-        ],
-        "required": False,
-        "profiles": ["high"]
-    },
     "face_restore": {
         "name": "CodeFormer",
         "files": [
             {
-                "url": "https://huggingface.co/spaces/sczhou/CodeFormer/resolve/main/weights/CodeFormer/codeformer.pth",
-                "path": "models/codeformer/codeformer.pth",
+                "url": "https://github.com/sczhou/CodeFormer/releases/download/v0.1.0/codeformer.pth",
+                "path": "codeformer/codeformer.pth",
                 "size_mb": 400
             }
         ],
-        "required": True,
+        "required": False,
         "profiles": ["high", "medium", "low", "cpu_optimized"]
     },
     "upscaler": {
         "name": "RealESRGAN x4",
         "files": [
             {
-                "url": "https://huggingface.co/ai-forever/Real-ESRGAN/resolve/main/RealESRGAN_x4.pth",
-                "path": "models/realesrgan/RealESRGAN_x4.pth",
+                "url": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth",
+                "path": "realesrgan/RealESRGAN_x4plus.pth",
                 "size_mb": 64
             }
         ],
         "required": False,
         "profiles": ["high", "medium"]
     },
-    "base_sd15": {
-        "name": "Realistic Vision V6",
-        "files": [
-            {
-                "url": "https://civitai.com/api/download/models/245598",
-                "path": "models/checkpoints/realisticVisionV60B1_v51VAE.safetensors",
-                "size_mb": 2000
-            }
-        ],
-        "required": True,
-        "profiles": ["high", "medium", "low", "cpu_optimized"]
-    },
     "clip_vision": {
-        "name": "CLIP Vision",
+        "name": "CLIP ViT-H",
         "files": [
             {
-                "url": "https://huggingface.co/openai/clip-vit-large-patch14/resolve/main/pytorch_model.bin",
-                "path": "models/clip/clip-vit-large-patch14.bin",
-                "size_mb": 600
+                "url": "https://huggingface.co/h94/IP-Adapter/resolve/main/models/image_encoder/model.safetensors",
+                "path": "clip/clip_vision_h.safetensors",
+                "size_mb": 2500
             }
         ],
-        "required": True,
-        "profiles": ["high", "medium", "low", "cpu_optimized"]
+        "required": False,
+        "profiles": ["high", "medium"]
+    },
+    "ip_adapter": {
+        "name": "IP-Adapter",
+        "files": [
+            {
+                "url": "https://huggingface.co/h94/IP-Adapter/resolve/main/models/ip-adapter_sd15.safetensors",
+                "path": "ip_adapter/ip-adapter_sd15.safetensors",
+                "size_mb": 44
+            }
+        ],
+        "required": False,
+        "profiles": ["high", "medium"]
     }
+}
+
+# Category mappings for easier downloads
+CATEGORIES = {
+    "insightface": ["face_detection"],
+    "dwpose": ["body_pose"],
+    "enhancement": ["face_restore", "upscaler"],
+    "clip": ["clip_vision", "ip_adapter"],
+    "essential": ["face_detection", "body_pose"],
+    "all": list(MODELS.keys())
 }
 
 
@@ -211,7 +178,12 @@ class ModelDownloader:
 
         for file_info in MODELS[model_id]["files"]:
             file_path = self.base_path / file_info["path"]
-            if not file_path.exists():
+            # For zip files, check if extracted folder exists
+            if file_info.get("extract") and file_path.suffix == '.zip':
+                extract_dir = file_path.parent / file_path.stem
+                if not extract_dir.exists():
+                    return False
+            elif not file_path.exists():
                 return False
         return True
 
@@ -220,8 +192,11 @@ class ModelDownloader:
         dest_path.parent.mkdir(parents=True, exist_ok=True)
 
         try:
-            # Start download
-            response = requests.get(url, stream=True, timeout=30)
+            # Start download with headers to handle some servers
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            }
+            response = requests.get(url, stream=True, timeout=60, headers=headers, allow_redirects=True)
             response.raise_for_status()
 
             total_size = int(response.headers.get('content-length', 0))
@@ -270,7 +245,7 @@ class ModelDownloader:
             return True
 
         except Exception as e:
-            print(f"Error downloading {url}: {e}")
+            print(f"\nError downloading {url}: {e}")
             progress = DownloadProgress(
                 model_name=model_name,
                 file_name=dest_path.name,
@@ -300,7 +275,14 @@ class ModelDownloader:
             if self.profile not in file_profiles:
                 continue
 
-            if file_path.exists():
+            # For zip files, check if already extracted
+            if file_info.get("extract") and file_path.suffix == '.zip':
+                extract_dir = file_path.parent / file_path.stem
+                if extract_dir.exists():
+                    print(f"  Already extracted: {extract_dir.name}")
+                    continue
+
+            if file_path.exists() and not file_info.get("extract"):
                 print(f"  Already exists: {file_path.name}")
                 progress = DownloadProgress(
                     model_name=model_info['name'],
@@ -316,14 +298,38 @@ class ModelDownloader:
             print(f"  Downloading: {file_path.name} ({file_info.get('size_mb', '?')} MB)")
             if not self.download_file(file_info["url"], file_path, model_info['name']):
                 success = False
+                continue
 
             # Handle extraction if needed
             if file_info.get("extract") and file_path.suffix == '.zip':
                 import zipfile
                 extract_dir = file_path.parent
                 print(f"  Extracting to: {extract_dir}")
-                with zipfile.ZipFile(file_path, 'r') as zip_ref:
-                    zip_ref.extractall(extract_dir)
+                try:
+                    with zipfile.ZipFile(file_path, 'r') as zip_ref:
+                        zip_ref.extractall(extract_dir)
+                    # Optionally remove zip after extraction
+                    # file_path.unlink()
+                except Exception as e:
+                    print(f"  Extraction error: {e}")
+                    success = False
+
+        return success
+
+    def download_category(self, category: str) -> bool:
+        """Download all models in a category"""
+        if category not in CATEGORIES:
+            print(f"Unknown category: {category}")
+            print(f"Available categories: {list(CATEGORIES.keys())}")
+            return False
+
+        model_ids = CATEGORIES[category]
+        print(f"\nDownloading category '{category}': {len(model_ids)} models")
+
+        success = True
+        for model_id in model_ids:
+            if not self.download_model(model_id):
+                success = False
 
         return success
 
@@ -348,12 +354,18 @@ class ModelDownloader:
         if include_optional:
             models_to_download.extend(self.get_optional_models())
 
+        print(f"\nDownloading {len(models_to_download)} models...")
+
         success = True
         for model_id in models_to_download:
             if not self.download_model(model_id):
                 success = False
 
         return success
+
+    def download_essential(self) -> bool:
+        """Download just the essential models (face + body detection)"""
+        return self.download_category("essential")
 
     def get_status(self) -> Dict:
         """Get status of all models"""
@@ -386,10 +398,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Download Comify AI models")
     parser.add_argument("--profile", default="medium", choices=["high", "medium", "low", "cpu_optimized"])
     parser.add_argument("--include-optional", action="store_true")
+    parser.add_argument("--category", help="Download specific category: insightface, dwpose, enhancement, essential, all")
     parser.add_argument("--list", action="store_true", help="List models without downloading")
     args = parser.parse_args()
 
-    base_path = Path(__file__).parent.parent
+    base_path = Path(__file__).parent.parent / "models"
     downloader = ModelDownloader(base_path, profile=args.profile)
     downloader.add_progress_callback(print_download_progress)
 
@@ -402,6 +415,12 @@ if __name__ == "__main__":
             required = "Required" if info["required"] else "Optional"
             profiles = ", ".join(info["profiles"])
             print(f"  {info['name']}: {downloaded} ({required}) [{profiles}]")
+        print("\nCategories:", list(CATEGORIES.keys()))
+    elif args.category:
+        print(f"\nDownloading category: {args.category}")
+        print("=" * 60)
+        downloader.download_category(args.category)
+        print("\nDownload complete!")
     else:
         print(f"\nDownloading models for profile: {args.profile}")
         print("=" * 60)
