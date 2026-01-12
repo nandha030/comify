@@ -23,7 +23,7 @@ if [ -d "comify" ]; then
     echo "Repository already exists, pulling latest..."
     cd comify
     git fetch --all
-    git reset --hard origin/main
+    git reset --hard origin/master
     echo "Updated to latest version"
 else
     git clone https://github.com/nandha030/comify.git
